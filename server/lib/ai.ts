@@ -42,7 +42,7 @@ export interface AiProvider {
   complete(messages: AiMessage[], opts?: { maxTokens?: number; timeoutMs?: number }): Promise<AiResult>;
 }
 
-const DEFAULT_MODEL = 'nvidia/nemotron-3.5-lightning-30b-a3b';
+const DEFAULT_MODEL = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
 const DEFAULT_BASE = 'https://integrate.api.nvidia.com/v1';
 
 class NemotronProvider implements AiProvider {
