@@ -12,8 +12,8 @@
 //     back to local FAQ matching, so chat keeps working without a key.
 // ---------------------------------------------------------------------------
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ok, fail, ApiError } from '../server/lib/http';
-import { ai, AiUnavailableError } from '../server/lib/ai';
+import { ok, fail, ApiError } from '../server/lib/http.js';
+import { ai, AiUnavailableError } from '../server/lib/ai.js';
 
 const MAX_MESSAGE = 1_000;      // chars per user message
 // Vercel Hobby defaults serverless functions to 10s — the NVIDIA NIM call can

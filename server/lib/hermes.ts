@@ -15,8 +15,8 @@
 // it in HttpHermesAdapter below without touching any route or UI code.
 // ---------------------------------------------------------------------------
 import { createHmac, timingSafeEqual } from 'node:crypto';
-import { hermesConfigured } from './env';
-import { ApiError } from './http';
+import { hermesConfigured } from './env.js';
+import { ApiError } from './http.js';
 
 export interface DispatchInput {
   websiteJobId: string;

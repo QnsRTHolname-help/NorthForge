@@ -14,11 +14,11 @@
 //     known (see docs/HERMES_INTEGRATION.md).
 // ---------------------------------------------------------------------------
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin } from '../../server/lib/supabaseAdmin';
-import { env } from '../../server/lib/env';
-import { fail, ApiError } from '../../server/lib/http';
-import { verifyCallbackSignature } from '../../server/lib/hermes';
-import { mapEvent } from '../../server/lib/eventMap';
+import { supabaseAdmin } from '../../server/lib/supabaseAdmin.js';
+import { env } from '../../server/lib/env.js';
+import { fail, ApiError } from '../../server/lib/http.js';
+import { verifyCallbackSignature } from '../../server/lib/hermes.js';
+import { mapEvent } from '../../server/lib/eventMap.js';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

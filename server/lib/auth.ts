@@ -5,8 +5,8 @@
 // ---------------------------------------------------------------------------
 import type { VercelRequest } from '@vercel/node';
 import { createClient } from '@supabase/supabase-js';
-import { env } from './env';
-import { ApiError, bearer } from './http';
+import { env } from './env.js';
+import { ApiError, bearer } from './http.js';
 
 export interface Principal {
   userId: string;

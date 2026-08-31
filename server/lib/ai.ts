@@ -11,7 +11,7 @@
 //     get a typed error and the platform keeps working; Hermes is untouched.
 //   * Callers pass ONLY the minimum authorized context (tenant isolation).
 // ---------------------------------------------------------------------------
-import { env } from './env';
+import { env } from './env.js';
 
 export interface AiMessage {
   role: 'system' | 'user' | 'assistant';
