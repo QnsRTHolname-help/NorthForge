@@ -135,8 +135,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
 /** Minimal dispatcher: hands every QUEUED job to the Hermes adapter once. */
 export async function dispatchQueuedJobs(): Promise<void> {
-  const { hermes } = await import('../../server/lib/hermes');
-  const { env } = await import('../../server/lib/env');
+  const { hermes } = await import('../../server/lib/hermes.js');
+  const { env } = await import('../../server/lib/env.js');
   const db = supabaseAdmin();
   const { data: queued } = await db
     .from('automation_jobs')

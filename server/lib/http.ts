@@ -27,9 +27,11 @@ export const fail = (res: VercelResponse, err: unknown) => {
   }
   // Unexpected: log server-side, return a safe generic message.
   console.error('[api] unhandled error:', err);
+  // TEMP DEBUG: expose root cause until deployment is verified, then revert.
+  const detail = err instanceof Error ? `${err.name}: ${err.message}` : String(err);
   return res.status(500).json({
     success: false,
-    error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.' },
+    error: { code: 'INTERNAL_ERROR', message: 'An unexpected error occurred.', detail },
   });
 };
 
