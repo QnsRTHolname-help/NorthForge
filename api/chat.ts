@@ -16,6 +16,10 @@ import { ok, fail, ApiError } from '../server/lib/http';
 import { ai, AiUnavailableError } from '../server/lib/ai';
 
 const MAX_MESSAGE = 1_000;      // chars per user message
+// Vercel Hobby defaults serverless functions to 10s — the NVIDIA NIM call can
+// legitimately take longer, and a killed function makes the widget drop into
+// FAQ mode ("Offline"). Raise the limit and keep the AI timeout inside it.
+export const maxDuration = 30;
 const MAX_HISTORY = 12;         // stored turns replayed to the model
 const MAX_FAQS = 30;
 const MAX_CONTEXT_CHARS = 8_000;
@@ -93,7 +97,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (!business) throw new ApiError(400, 'VALIDATION', 'Business context is required.');
 
     try {
-      const { text, model } = await ai.complete(buildMessages(body), { maxTokens: 400, timeoutMs: 25_000 });
+      const { text, model } = await ai.complete(buildMessages(body), { maxTokens: 400, timeoutMs: 20_000 });
       return ok(res, { reply: text, source: 'ai', model });
     } catch (err) {
       // Typed AI errors are surfaced so the widget can fall back to FAQ matching.
