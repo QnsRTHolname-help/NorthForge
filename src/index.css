@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@600;700;800;900&family=DM+Sans:wght@400;500;700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ===========================================================================
+   NORTHFORGE — HIGH-FIDELITY CLAYMORPHISM DESIGN TOKENS
+   Light theme is clay-native (canvas #F4F1FA). Dark is a deep violet-charcoal
+   clay, genuinely designed rather than inverted.
+   =========================================================================== */
+
+:root {
+  /* Surfaces */
+  --surface: 244 241 250;   /* #F4F1FA canvas */
+  --panel: 250 248 254;     /* clay card top */
+  --elevated: 255 255 255;  /* modals / popovers */
+  --sunken: 236 231 245;    /* recessed inputs */
+  --line: 226 219 240;      /* soft borders */
+  /* Text */
+  --content: 51 47 58;      /* #332F3A */
+  --muted: 99 95 105;       /* #635F69 */
+  --faint: 150 144 160;
+
+  /* Multi-layer clay shadows: ambient depth + top-left light + colored bounce + inner highlight */
+  --clay-sm:
+    6px 6px 14px rgba(124,58,237,0.10),
+    -4px -4px 12px rgba(255,255,255,0.90),
+    inset 1px 1px 2px rgba(255,255,255,0.65);
+  --clay:
+    12px 14px 30px rgba(93,53,177,0.14),
+    -8px -8px 22px rgba(255,255,255,0.92),
+    inset 2px 2px 4px rgba(255,255,255,0.70),
+    inset -3px -3px 8px rgba(124,58,237,0.05);
+  --clay-lg:
+    22px 26px 50px rgba(93,53,177,0.18),
+    -14px -14px 36px rgba(255,255,255,0.95),
+    inset 3px 3px 6px rgba(255,255,255,0.75),
+    inset -4px -4px 12px rgba(124,58,237,0.06);
+  --clay-xl:
+    34px 40px 80px rgba(93,53,177,0.22),
+    -18px -18px 48px rgba(255,255,255,0.95),
+    inset 4px 4px 8px rgba(255,255,255,0.80),
+    inset -6px -6px 16px rgba(124,58,237,0.07);
+  --clay-pressed:
+    inset 6px 6px 14px rgba(93,53,177,0.16),
+    inset -5px -5px 12px rgba(255,255,255,0.85);
+  --clay-inset:
+    inset 5px 5px 12px rgba(93,53,177,0.12),
+    inset -4px -4px 10px rgba(255,255,255,0.80);
+
+  --blob-a: rgba(124,58,237,0.28);
+  --blob-b: rgba(219,39,119,0.22);
+  --blob-c: rgba(14,165,233,0.22);
+
+  --card-hi: linear-gradient(160deg, #faf8fe, #f0e9ff);
+  --hub-hi: linear-gradient(135deg, #faf8fe, #ede6ff);
+}
+
+.dark {
+  --surface: 24 20 34;      /* deep violet charcoal */
+  --panel: 34 28 48;
+  --elevated: 40 33 56;
+  --sunken: 22 18 32;
+  --line: 55 46 76;
+  --content: 236 232 245;
+  --muted: 176 168 194;
+  --faint: 128 120 148;
+
+  --clay-sm:
+    6px 6px 14px rgba(0,0,0,0.45),
+    -4px -4px 12px rgba(255,255,255,0.03),
+    inset 1px 1px 2px rgba(255,255,255,0.05);
+  --clay:
+    12px 14px 30px rgba(0,0,0,0.50),
+    -8px -8px 22px rgba(255,255,255,0.035),
+    inset 2px 2px 4px rgba(255,255,255,0.05),
+    inset -3px -3px 8px rgba(0,0,0,0.30);
+  --clay-lg:
+    22px 26px 50px rgba(0,0,0,0.55),
+    -14px -14px 36px rgba(255,255,255,0.04),
+    inset 3px 3px 6px rgba(255,255,255,0.05),
+    inset -4px -4px 12px rgba(0,0,0,0.35);
+  --clay-xl:
+    34px 40px 80px rgba(0,0,0,0.60),
+    -18px -18px 48px rgba(255,255,255,0.04),
+    inset 4px 4px 8px rgba(255,255,255,0.06),
+    inset -6px -6px 16px rgba(0,0,0,0.40);
+  --clay-pressed:
+    inset 6px 6px 14px rgba(0,0,0,0.55),
+    inset -5px -5px 12px rgba(255,255,255,0.04);
+  --clay-inset:
+    inset 5px 5px 12px rgba(0,0,0,0.45),
+    inset -4px -4px 10px rgba(255,255,255,0.04);
+
+  --blob-a: rgba(124,58,237,0.34);
+  --blob-b: rgba(219,39,119,0.24);
+  --blob-c: rgba(14,165,233,0.22);
+
+  --card-hi: linear-gradient(160deg, #2c2442, #241d38);
+  --hub-hi: linear-gradient(135deg, #322a4c, #281f3c);
+}
+
+* { -webkit-tap-highlight-color: transparent; }
+html, body, #root { height: 100%; }
+
+body {
+  margin: 0;
+  font-family: 'DM Sans', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  background-color: rgb(var(--surface));
+  color: rgb(var(--content));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+h1, h2, h3, h4, h5, .font-display { font-family: 'Nunito', ui-sans-serif, system-ui, sans-serif; }
+
+::selection { background: rgba(124,58,237,0.22); }
+
+/* Soft scrollbars */
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: rgb(var(--line)); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+::-webkit-scrollbar-thumb:hover { background: rgb(var(--faint)); background-clip: content-box; }
+::-webkit-scrollbar-track { background: transparent; }
+
+@layer components {
+  /* ---- CLAY SURFACES ---- */
+  .card {
+    @apply bg-panel rounded-3xl;
+    box-shadow: var(--clay);
+    border: 1px solid rgba(255,255,255,0.35);
+  }
+  .dark .card { border-color: rgba(255,255,255,0.05); }
+
+  .card-sm { box-shadow: var(--clay-sm); }
+  .card-lg { box-shadow: var(--clay-lg); }
+
+  .card-hover {
+    @apply transition-all duration-300;
+  }
+  .card-hover:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--clay-lg);
+  }
+  .card-hover:active { transform: translateY(-1px) scale(0.995); }
+
+  /* ---- BUTTONS (physically raised → compress) ---- */
+  .btn {
+    @apply inline-flex items-center justify-center gap-2 rounded-xl text-sm font-bold px-4 py-2.5 transition-all duration-200 select-none;
+    @apply disabled:opacity-50 disabled:pointer-events-none;
+    font-family: 'Nunito', sans-serif;
+  }
+  .btn:focus-visible { outline: none; box-shadow: 0 0 0 4px rgba(124,58,237,0.28); }
+
+  .btn-primary {
+    @apply btn text-white;
+    background: linear-gradient(135deg, #8b5cf6, #7C3AED);
+    box-shadow: 6px 8px 18px rgba(124,58,237,0.40), -3px -3px 10px rgba(255,255,255,0.30), inset 1px 1px 2px rgba(255,255,255,0.45), inset -2px -2px 6px rgba(76,29,149,0.35);
+  }
+  .btn-primary:hover { transform: translateY(-2px); box-shadow: 8px 12px 26px rgba(124,58,237,0.48), -4px -4px 12px rgba(255,255,255,0.30), inset 1px 1px 2px rgba(255,255,255,0.45); }
+  .btn-primary:active { transform: translateY(1px) scale(0.94); box-shadow: inset 4px 4px 10px rgba(76,29,149,0.45), inset -2px -2px 6px rgba(255,255,255,0.20); }
+
+  .btn-outline {
+    @apply btn bg-panel text-content;
+    box-shadow: var(--clay-sm);
+  }
+  .btn-outline:hover { transform: translateY(-2px); box-shadow: var(--clay); }
+  .btn-outline:active { transform: scale(0.94); box-shadow: var(--clay-pressed); }
+
+  .btn-ghost { @apply btn text-muted; box-shadow: none; }
+  .btn-ghost:hover { @apply text-content bg-sunken; }
+  .btn-ghost:active { transform: scale(0.94); box-shadow: var(--clay-pressed); }
+
+  .btn-danger {
+    @apply btn text-white;
+    background: linear-gradient(135deg, #f43f5e, #e11d48);
+    box-shadow: 6px 8px 18px rgba(225,29,72,0.35), inset 1px 1px 2px rgba(255,255,255,0.35);
+  }
+  .btn-danger:hover { transform: translateY(-2px); }
+  .btn-danger:active { transform: scale(0.94); }
+
+  .btn-sm { @apply px-3 py-1.5 text-xs rounded-lg gap-1.5; }
+
+  /* ---- INPUTS (recessed / soft) ---- */
+  .input {
+    @apply w-full bg-sunken rounded-xl px-3.5 py-2.5 text-sm text-content placeholder:text-faint transition-all;
+    box-shadow: var(--clay-inset);
+    border: 1px solid transparent;
+  }
+  .input:focus { outline: none; border-color: rgba(124,58,237,0.35); box-shadow: var(--clay-inset), 0 0 0 4px rgba(124,58,237,0.16); }
+
+  .label { @apply block text-xs font-bold text-muted mb-1.5; font-family: 'Nunito', sans-serif; }
+
+  /* ---- BADGES / CHIPS ---- */
+  .badge { @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold; font-family: 'Nunito', sans-serif; }
+  .chip {
+    @apply inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-bold text-muted bg-panel transition-all;
+    box-shadow: var(--clay-sm);
+  }
+  .kbd { @apply inline-flex items-center rounded-lg bg-sunken px-1.5 py-0.5 text-[10px] font-bold text-muted; box-shadow: var(--clay-inset); }
+
+  /* ---- NAV ---- */
+  .nav-link {
+    @apply flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-bold text-muted transition-all duration-200;
+    font-family: 'Nunito', sans-serif;
+  }
+  .nav-link:hover { @apply text-content bg-sunken; }
+  .nav-link.active {
+    @apply text-white;
+    background: linear-gradient(135deg, #8b5cf6, #7C3AED);
+    box-shadow: 4px 6px 14px rgba(124,58,237,0.38), inset 1px 1px 2px rgba(255,255,255,0.35);
+  }
+
+  .section-title { @apply text-[11px] font-extrabold uppercase tracking-wider text-faint px-3 mb-2 mt-5; font-family: 'Nunito', sans-serif; }
+  .table-row { @apply transition-colors; }
+  .table-row:hover { background: rgb(var(--sunken) / 0.5); }
+  .skeleton { @apply animate-pulse rounded-2xl; background: rgb(var(--sunken)); }
+}
+
+/* ---- Animated background blobs ---- */
+.clay-blobs { position: fixed; inset: 0; overflow: hidden; pointer-events: none; z-index: 0; }
+.clay-blobs .blob { position: absolute; border-radius: 50%; filter: blur(60px); }
+
+.page-enter { animation: fade-up .5s cubic-bezier(0.22,1,0.36,1) both; }
+@keyframes fade-up { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+  .clay-blobs { display: none; }
+}

@@ -1,0 +1,96 @@
+# Hermes Integration
+
+Hermes is the external server-side automation engine. The website is only the
+control plane: it creates jobs, queues them, dispatches them to Hermes, and
+records what Hermes reports. **Nothing in this codebase simulates execution,
+progress, results, or Hermes status.**
+
+## Current state (honest)
+
+The Hermes API contract is **not yet available**. Therefore:
+
+- `api/lib/hermes.ts` defines the adapter interface and ships an
+  `UnconfiguredHermesAdapter` that:
+  - `dispatch()` → throws `HERMES_NOT_CONFIGURED` (jobs stay safely `QUEUED`)
+  - `cancel()` → throws `CANCEL_NOT_SUPPORTED`
+  - `health()` → returns `{ status: 'UNKNOWN' }`
+- The Admin Hermes page will show `UNKNOWN` until the contract is configured.
+- No fake job IDs, no synthetic progress, no demo results exist anywhere.
+
+## What is already built (contract-independent)
+
+- `supabase/migrations/001_automation_control_plane.sql` — automation
+  definitions, versioning (DRAFT/ACTIVE/ARCHIVED, one active version), jobs
+  with **DB-enforced state machine** (`DRAFT → QUEUED → DISPATCHING → ACCEPTED
+  → RUNNING/WAITING → COMPLETED|FAILED|CANCELLING → CANCELLED`; terminal
+  states cannot be resurrected), idempotent events, results, files, logs,
+  Hermes connection health, tenant-scoped RLS. Browser code can never write
+  job state.
+- `POST /api/automation/jobs` — creates job + config snapshot + initial event;
+  closes immediately (no waiting on Hermes in the request).
+- `GET /api/automation/jobs`, `GET /api/automation/jobs/:id` (tenant-guarded).
+- `POST /api/automation/jobs/:id/cancel` — only via Hermes; refuses when
+  unsupported. `…/:id/retry` — creates a new attempt, history preserved.
+- `POST /api/hermes/events` — secure callback receiver:
+  - HMAC-SHA256 over `${timestamp}.${rawBody}` with `HERMES_CALLBACK_SECRET`
+    (headers `X-Hermes-Signature`, `X-Hermes-Timestamp`), replay window 5 min,
+    `timingSafeEqual` comparison.
+  - Idempotency via `unique(source, event_id)`.
+  - Monotonic progress, guarded transitions, client-visible vs internal
+    event separation, notification + result/file persistence.
+- `GET /api/admin/hermes/status` — real probe + real queue counters.
+
+## Contract checklist (fill this in to finish the adapter)
+
+1. **Base URL / auth** — `HERMES_API_URL`, auth header scheme for `HERMES_API_KEY`.
+2. **Submit job** — endpoint + request/response JSON; how the website job id
+   and Hermes job id are linked.
+3. **Events** — does Hermes call our callback (`POST /api/hermes/events`)? Its
+   event type names (we currently map `JOB_ACCEPTED`, `JOB_STARTED`,
+   `STEP_STARTED/PROGRESS/COMPLETED`, `MESSAGE`, `WARNING`, `RESULT_CREATED`,
+   `FILE_CREATED`, `JOB_COMPLETED`, `JOB_FAILED`, `JOB_CANCELLED`), payload
+   fields, event id + sequence numbers.
+4. **Callback signing** — if Hermes signs differently than
+   `HMAC(secret, timestamp.body)`, adjust `verifyCallbackSignature`.
+5. **Capabilities** — cancel? pause/resume? progress % vs stage names? file
+   delivery mechanism? streaming? (UI controls are rendered per capability.)
+6. **Health/heartbeat** — endpoint for `hermes.health()`.
+7. **Automation identity** — slug/key/versioning semantics
+   (`automation_definitions.hermes_automation_key`).
+
+Once provided, implement `HttpHermesAdapter` in `api/lib/hermes.ts` and adjust
+`api/lib/eventMap.ts` — no route or UI changes required.
+
+## Environment variables (server only)
+
+```
+SUPABASE_URL=            SUPABASE_ANON_KEY=       SUPABASE_SERVICE_ROLE_KEY=
+HERMES_API_URL=          HERMES_API_KEY=          HERMES_CALLBACK_SECRET=
+PUBLIC_BASE_URL=         # e.g. https://your-site.vercel.app
+NEMOTRON_API_URL=        NEMOTRON_API_KEY=        NEMOTRON_MODEL=   # optional
+```
+
+Secrets never reach the browser; only `VITE_*` values are exposed.
+
+## Nemotron AI layer (implemented)
+
+`api/lib/ai.ts` provides `AIService -> NemotronProvider` (NVIDIA NIM,
+OpenAI-compatible). Endpoint: `GET /api/automation/jobs/:id/ai-summary`.
+
+- **Server-side only** — `NEMOTRON_API_KEY` lives in process.env, never in the
+  bundle. Default base `https://integrate.api.nvidia.com/v1`, default model
+  `nvidia/nemotron-3.5-lightning-30b-a3b`.
+- **Tenant isolation** — auth first; only the owner's (or admin's)
+  summary/findings/metrics/recommendations are sent, size-bounded to 24k chars.
+  The whole database is never sent to the model.
+- **Caching** — the summary is stored on `automation_results.ai_summary` with
+  `ai_summary_at` freshness (10 min). Admins may force `?refresh=1`.
+- **Failure isolation** — timeouts (30 s), rate limits, and outages raise
+  typed errors (`AI_NOT_CONFIGURED`, `AI_RATE_LIMITED`, `AI_TIMEOUT`,
+  `AI_UNAVAILABLE`, `AI_INVALID_RESPONSE`); a stale cached summary is served
+  when present. Hermes, job state, and the authoritative result are untouched.
+- **Transparency** — responses carry `source: 'nemotron'` + model name; UIs
+  must label AI summaries as "AI Summary — generated by Nemotron" and never
+  present them as Hermes output. The AI can never change job status,
+  progress, or permissions.
+
