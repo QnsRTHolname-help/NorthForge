@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0",
-    "dev:api": "tsx watch --env-file=.env.local api/dev-server.ts",
+    "dev:api": "tsx watch --env-file=.env.local server/dev-server.ts",
     "build": "tsc -b && vite build",
     "preview": "vite preview --host 0.0.0.0",
     "typecheck:api": "tsc -p tsconfig.api.json"

@@ -10,5 +10,5 @@
     "noEmit": true,
     "baseUrl": "."
   },
-  "include": ["api/**/*.ts"]
+  "include": ["api/**/*.ts", "server/**/*.ts"]
 }

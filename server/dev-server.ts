@@ -9,7 +9,7 @@
 // ---------------------------------------------------------------------------
 import { createServer } from 'node:http';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import chatHandler from './chat';
+import chatHandler from '../api/chat';
 
 const PORT = Number(process.env.PORT || 3000);
 

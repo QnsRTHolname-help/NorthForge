@@ -12,8 +12,8 @@
 //     back to local FAQ matching, so chat keeps working without a key.
 // ---------------------------------------------------------------------------
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { ok, fail, ApiError } from './lib/http';
-import { ai, AiUnavailableError } from './lib/ai';
+import { ok, fail, ApiError } from '../server/lib/http';
+import { ai, AiUnavailableError } from '../server/lib/ai';
 
 const MAX_MESSAGE = 1_000;      // chars per user message
 const MAX_HISTORY = 12;         // stored turns replayed to the model

@@ -5,10 +5,10 @@
 // hermes_connections so the admin dashboard reflects actual heartbeats.
 // ---------------------------------------------------------------------------
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin } from '../../lib/supabaseAdmin';
-import { authenticate, requireAdmin } from '../../lib/auth';
-import { ok, fail } from '../../lib/http';
-import { hermes } from '../../lib/hermes';
+import { supabaseAdmin } from '../../../server/lib/supabaseAdmin';
+import { authenticate, requireAdmin } from '../../../server/lib/auth';
+import { ok, fail } from '../../../server/lib/http';
+import { hermes } from '../../../server/lib/hermes';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

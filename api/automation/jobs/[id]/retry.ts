@@ -6,9 +6,9 @@
 // automation retry of a FAILED job.
 // ---------------------------------------------------------------------------
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin } from '../../../lib/supabaseAdmin';
-import { authenticate, assertTenant } from '../../../lib/auth';
-import { ok, fail, ApiError } from '../../../lib/http';
+import { supabaseAdmin } from '../../../../server/lib/supabaseAdmin';
+import { authenticate, assertTenant } from '../../../../server/lib/auth';
+import { ok, fail, ApiError } from '../../../../server/lib/http';
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   try {

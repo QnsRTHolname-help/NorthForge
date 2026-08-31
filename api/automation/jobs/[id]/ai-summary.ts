@@ -14,10 +14,10 @@
 //     ai_summary/ai_summary_model columns.
 // ---------------------------------------------------------------------------
 import type { VercelRequest, VercelResponse } from '@vercel/node';
-import { supabaseAdmin } from '../../../lib/supabaseAdmin';
-import { authenticate, assertTenant } from '../../../lib/auth';
-import { ok, fail, ApiError } from '../../../lib/http';
-import { ai, buildSummaryMessages, AiUnavailableError } from '../../../lib/ai';
+import { supabaseAdmin } from '../../../../server/lib/supabaseAdmin';
+import { authenticate, assertTenant } from '../../../../server/lib/auth';
+import { ok, fail, ApiError } from '../../../../server/lib/http';
+import { ai, buildSummaryMessages, AiUnavailableError } from '../../../../server/lib/ai';
 
 const CACHE_MIN_MS = 10 * 60_000;
 
