@@ -85,8 +85,7 @@ class NemotronProvider implements AiProvider {
         throw new AiUnavailableError('AI_RATE_LIMITED', 'AI provider is rate limited; try again shortly.');
       }
       if (!res.ok) {
-        const errBody = await res.text().catch(() => '');
-        throw new AiUnavailableError('AI_UNAVAILABLE', `AI provider error (${res.status}): ${errBody.slice(0, 300)}`);
+        throw new AiUnavailableError('AI_UNAVAILABLE', `AI provider error (${res.status}).`);
       }
       const data = (await res.json()) as any;
       const text: string | undefined = data?.choices?.[0]?.message?.content;

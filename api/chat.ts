@@ -102,7 +102,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch (err) {
       // Typed AI errors are surfaced so the widget can fall back to FAQ matching.
       if (err instanceof AiUnavailableError) {
-        return ok(res, { reply: null, source: 'fallback', code: err.code, detail: err.message });
+        return ok(res, { reply: null, source: 'fallback', code: err.code });
       }
       throw err;
     }
