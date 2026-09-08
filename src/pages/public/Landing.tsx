@@ -68,6 +68,8 @@ export default function Landing() {
       <main className="relative z-10">
         <Hero />
         <ValueStrip />
+        <ProblemSection />
+        <Promises />
         <Services />
         <HowItWorks />
         <Pricing />
@@ -75,6 +77,7 @@ export default function Landing() {
         <AIShowcase />
         <LeadShowcase />
         <WhyNorthForge />
+        <SystemMonitor />
         <FAQ />
         <FinalCTA />
       </main>
@@ -164,31 +167,62 @@ function Nav({ menu, setMenu }: { menu: boolean; setMenu: (v: boolean) => void }
 
 /* ============================ HERO ============================ */
 function Hero() {
+  const root = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+
+  // Hero entrance choreography — navbar handled by Nav, then eyebrow,
+  // headline, copy, CTAs, notes, then the connected system visual.
+  useEffect(() => {
+    const el = root.current;
+    if (!el || reduced) return;
+    const ctx = gsap.context(() => {
+      const parts = [
+        '[data-hero-eyebrow]',
+        '[data-hero-headline]',
+        '[data-hero-copy]',
+        '[data-hero-cta]',
+        '[data-hero-notes]',
+        '[data-hero-visual]',
+      ];
+      gsap.set(parts, { autoAlpha: 0, y: 24 });
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.8 } });
+      tl.fromTo('[data-hero-eyebrow]', { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.45 })
+        .fromTo('[data-hero-headline]', { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0 }, '-=0.15')
+        .fromTo('[data-hero-copy]', { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0 }, '-=0.4')
+        .fromTo('[data-hero-cta]', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0 }, '-=0.4')
+        .fromTo('[data-hero-notes]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.35')
+        .fromTo('[data-hero-visual]', { autoAlpha: 0, scale: 0.97 }, { autoAlpha: 1, scale: 1 }, '-=0.3');
+    }, el);
+    return () => ctx.revert();
+  }, [reduced]);
+
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-8 sm:pt-20 sm:pb-16">
+    <section ref={root} className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-8 sm:pt-20 sm:pb-16">
       <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-6 items-center">
-        <div className="animate-fade-up">
-          <div className="inline-flex items-center gap-2 chip mb-6"><Sparkles size={13} className="text-brand" /> Web · Automation · AI · Growth</div>
-          <h1 className="font-display font-black text-content leading-[1.02] tracking-tight text-[42px] sm:text-6xl">
+        <div>
+          <div data-hero-eyebrow className="inline-flex items-center gap-2 chip mb-6"><Sparkles size={13} className="text-brand" /> Web · Automation · AI · Growth</div>
+          <h1 data-hero-headline className="font-display font-black text-content leading-[1.02] tracking-tight text-[42px] sm:text-6xl">
             Premium websites that <span className="relative inline-block">actually
               <svg className="absolute -bottom-1 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 7 Q100 1 198 6" stroke="#DB2777" strokeWidth="4" fill="none" strokeLinecap="round"/></svg>
             </span> bring leads.
           </h1>
-          <p className="mt-6 text-lg text-muted max-w-xl leading-relaxed">
+          <p data-hero-copy className="mt-6 text-lg text-muted max-w-xl leading-relaxed">
             NorthForge builds business websites with lead capture, WhatsApp, AI assistants and automation — so visitors turn into enquiries and enquiries turn into customers.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div data-hero-cta className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/login" className="btn-primary !px-6 !py-3 text-base">Start Your Website <ArrowRight size={18} /></Link>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="btn-outline !px-6 !py-3 text-base">View Pricing</a>
             <a href={waLink} target="_blank" rel="noreferrer" className="btn-ghost !px-4 !py-3 text-base text-brand"><MessageCircle size={18} /> WhatsApp</a>
           </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold text-muted">
+          <div data-hero-notes className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold text-muted">
             {['Hosting & SSL included', 'Live in 7–14 days', 'From ₹999 / 28 days'].map((t) => (
               <span key={t} className="flex items-center gap-1.5"><Check size={14} className="text-clay-success" /> {t}</span>
             ))}
           </div>
         </div>
-        <Parallax speed={11}><HeroComposition /></Parallax>
+        <div data-hero-visual>
+          <Parallax speed={11}><HeroComposition /></Parallax>
+        </div>
       </div>
     </section>
   );
@@ -237,6 +271,112 @@ function HeroComposition() {
         </div>
       ))}
     </div>
+  );
+}
+
+/* ============================ PROBLEM ============================ */
+function ProblemSection() {
+  const { ref, cls } = useReveal();
+  const pains = [
+    { icon: MessageCircle, title: 'Missed enquiries', text: 'A visitor reaches out at night and never hears back.' },
+    { icon: Zap, title: 'Slow replies', text: 'Answering the same questions over and over instead of doing the work.' },
+    { icon: CalendarClock, title: 'Manual follow-ups', text: 'Chasing leads by memory and hoping they get back to you.' },
+    { icon: Users, title: 'Scattered customer info', text: 'WhatsApp chats, emails, spreadsheets — nowhere connected.' },
+    { icon: Search, title: 'Poor visibility', text: 'You know the website gets traffic, but you can\u2019t see what happens after.' },
+    { icon: Bot, title: 'Disconnected tools', text: 'Each tool solves one problem, and they don\u2019t talk to each other.' },
+  ];
+  return (
+    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-16', cls)}>
+      <SectionHead eyebrow="The real problem" title="Traffic isn\u2019t the issue. What happens after it is." sub="Most businesses already have enquiries coming in. The reason they don\u2019t become customers is rarely the website — it\u2019s the disconnect between the enquiry and the follow-up." />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
+        {pains.map((p) => (
+          <div key={p.title} className="card p-6">
+            <div className="w-11 h-11 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4"><p.icon size={18} /></div>
+            <h3 className="font-display font-extrabold text-content">{p.title}</h3>
+            <p className="text-sm text-muted mt-1.5 leading-relaxed">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============================ NORTHFORGE PROMISE ============================ */
+function Promises() {
+  const { ref, cls } = useReveal();
+  const promises = [
+    { n: 'FIND', text: 'Find the repetitive business work that quietly steals your time.' },
+    { n: 'CONNECT', text: 'Connect the tools you already use into one system.' },
+    { n: 'AUTOMATE', text: 'Turn repetitive work into intelligent, reliable workflows.' },
+    { n: 'MEASURE', text: 'Track what is really happening, so you can grow with evidence.' },
+  ];
+  return (
+    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-16', cls)}>
+      <SectionHead eyebrow="What we promise" title="Not a website. A system that works." sub="NorthForge exists to take the repetitive parts of running a business and make them automatic, visible and measurable." />
+      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
+        {promises.map((p, i) => (
+          <div key={p.n} className="card p-6 relative overflow-hidden">
+            <span className="absolute -right-2 -top-4 font-display font-black text-[88px] leading-none text-brand/10 select-none">{i + 1}</span>
+            <span className="inline-flex items-center gap-2 chip text-brand mb-4"><span className="w-1.5 h-1.5 rounded-full bg-brand" /> {p.n}</span>
+            <p className="text-sm text-content font-medium leading-relaxed relative">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+/* ============================ SYSTEM MONITOR ============================ */
+function SystemMonitor() {
+  const { ref, cls } = useReveal();
+  const metrics = [
+    { k: 'Enquiries', v: '—' },
+    { k: 'Qualified leads', v: '—' },
+    { k: 'Follow-ups', v: '—' },
+    { k: 'Appointments', v: '—' },
+  ];
+  const stream = [
+    { icon: MessageCircle, label: 'NEW ENQUIRY' },
+    { icon: Bot, label: 'AI QUALIFIED' },
+    { icon: BarChart3, label: 'CRM UPDATED' },
+    { icon: Zap, label: 'TEAM NOTIFIED' },
+    { icon: CalendarClock, label: 'APPOINTMENT BOOKED' },
+    { icon: Check, label: 'FOLLOW-UP SCHEDULED' },
+  ];
+  return (
+    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-16', cls)}>
+      <div className="card p-6 sm:p-10 relative overflow-hidden" style={{ background: 'var(--card-hi)' }}>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="chip text-[11px] mb-3">NORTHFORGE SYSTEM</div>
+            <h2 className="font-display font-black text-content text-2xl sm:text-3xl tracking-tight">The system behind the website.</h2>
+            <p className="text-sm text-muted mt-2 max-w-xl leading-relaxed">When a visitor submits an enquiry, the NorthForge layer captures it, qualifies it, notifies the team and keeps the follow-up moving.</p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <span className="badge bg-clay-success/15 text-emerald-600 dark:text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-current" /> Active</span>
+            <span className="badge bg-sunken text-faint">DEMO DATA</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {metrics.map((m) => (
+            <div key={m.k} className="card p-5 text-center">
+              <p className="font-display font-black text-content text-2xl">{m.v}</p>
+              <p className="text-xs text-muted font-bold mt-1">{m.k}</p>
+            </div>
+          ))}
+        </div>
+        <Marquee speed={26} decorative>
+          {stream.map((s) => (
+            <span key={s.label} className="inline-flex items-center gap-2 mx-3 chip">
+              <s.icon size={15} className="text-brand" />
+              <span className="font-display font-extrabold text-content text-xs">{s.label}</span>
+              <span className="w-1 h-1 rounded-full bg-clay-success" />
+            </span>
+          ))}
+        </Marquee>
+        <p className="text-[11px] text-faint mt-6">Numbers fill in once your website starts capturing real enquiries. Nothing here is invented, and AI never presents sample data as your real performance.</p>
+      </div>
+    </section>
   );
 }
 
