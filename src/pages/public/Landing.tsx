@@ -15,7 +15,7 @@ import { PLANS, AGENCY, formatINR } from '@/data/catalog';
 import { PUBLIC_FAQS } from '@/data/faq';
 import { cx } from '@/utils/format';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
-import { ScrollProgress, Parallax, Marquee, useReducedMotion } from '@/components/motion/motion';
+import { ScrollProgress, Parallax, Marquee, useReducedMotion, useMobileDevice } from '@/components/motion/motion';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
@@ -66,10 +66,8 @@ export default function Landing() {
       <ChatWidget assistant={assistant} />
       <span id="top" />
       <main className="relative z-10">
-        <Hero />
+        <CinematicStage />
         <ValueStrip />
-        <ProblemSection />
-        <Promises />
         <Services />
         <HowItWorks />
         <Pricing />
@@ -274,55 +272,172 @@ function HeroComposition() {
   );
 }
 
-/* ============================ PROBLEM ============================ */
-function ProblemSection() {
-  const { ref, cls } = useReveal();
-  const pains = [
-    { icon: MessageCircle, title: 'Missed enquiries', text: 'A visitor reaches out at night and never hears back.' },
-    { icon: Zap, title: 'Slow replies', text: 'Answering the same questions over and over instead of doing the work.' },
-    { icon: CalendarClock, title: 'Manual follow-ups', text: 'Chasing leads by memory and hoping they get back to you.' },
-    { icon: Users, title: 'Scattered customer info', text: 'WhatsApp chats, emails, spreadsheets — nowhere connected.' },
-    { icon: Search, title: 'Poor visibility', text: 'You know the website gets traffic, but you can\u2019t see what happens after.' },
-    { icon: Bot, title: 'Disconnected tools', text: 'Each tool solves one problem, and they don\u2019t talk to each other.' },
-  ];
+/* ============================ CINEMATIC STAGE =============================
+   Igloo-style scroll: the first three stories are one pinned scene. As you
+   scroll, the camera moves forward — the hero drifts away, a flash washes
+   across, then the problem and promise scenes rise into view. Scrubbed to
+   scroll, fully reversed on scroll-up, and disabled on mobile/reduced motion
+   where a simple stacked read is the right call. */
+const PAINS = [
+  { icon: MessageCircle, title: 'Missed enquiries', text: 'A visitor reaches out at night and never hears back.' },
+  { icon: Zap, title: 'Slow replies', text: 'Answering the same questions over and over instead of doing the work.' },
+  { icon: CalendarClock, title: 'Manual follow-ups', text: 'Chasing leads by memory and hoping they get back to you.' },
+  { icon: Users, title: 'Scattered customer info', text: 'WhatsApp chats, emails, spreadsheets — nowhere connected.' },
+  { icon: Search, title: 'Poor visibility', text: 'You know the website gets traffic, but you can\u2019t see what happens after.' },
+  { icon: Bot, title: 'Disconnected tools', text: 'Each tool solves one problem, and they don\u2019t talk to each other.' },
+];
+const PROMISES = [
+  { n: 'FIND', text: 'Find the repetitive business work that quietly steals your time.' },
+  { n: 'CONNECT', text: 'Connect the tools you already use into one system.' },
+  { n: 'AUTOMATE', text: 'Turn repetitive work into intelligent, reliable workflows.' },
+  { n: 'MEASURE', text: 'Track what is really happening, so you can grow with evidence.' },
+];
+
+function ProblemScene() {
   return (
-    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-16', cls)}>
-      <SectionHead eyebrow="The real problem" title="Traffic isn\u2019t the issue. What happens after it is." sub="Most businesses already have enquiries coming in. The reason they don\u2019t become customers is rarely the website — it\u2019s the disconnect between the enquiry and the follow-up." />
-      <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-10">
-        {pains.map((p) => (
-          <div key={p.title} className="card p-6">
-            <div className="w-11 h-11 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-4"><p.icon size={18} /></div>
-            <h3 className="font-display font-extrabold text-content">{p.title}</h3>
-            <p className="text-sm text-muted mt-1.5 leading-relaxed">{p.text}</p>
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 text-center">
+      <div className="inline-flex items-center gap-2 chip mb-5"><span className="w-1.5 h-1.5 rounded-full bg-pink2" /> The real problem</div>
+      <h2 className="font-display font-black text-content leading-[1.05] tracking-tight text-3xl sm:text-5xl max-w-3xl mx-auto">
+        Traffic isn't the issue. What happens after it is.
+      </h2>
+      <p className="text-muted mt-4 max-w-2xl mx-auto leading-relaxed">
+        Most businesses already have enquiries coming in. The reason they don't become customers is rarely the website — it's the disconnect between the enquiry and the follow-up.
+      </p>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-8 max-w-4xl mx-auto">
+        {PAINS.map((p) => (
+          <div key={p.title} className="card p-5 text-left">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-3"><p.icon size={17} /></div>
+            <h3 className="font-display font-extrabold text-content text-[15px]">{p.title}</h3>
+            <p className="text-xs text-muted mt-1 leading-relaxed">{p.text}</p>
           </div>
         ))}
       </div>
-    </section>
+    </div>
   );
 }
 
-/* ============================ NORTHFORGE PROMISE ============================ */
-function Promises() {
-  const { ref, cls } = useReveal();
-  const promises = [
-    { n: 'FIND', text: 'Find the repetitive business work that quietly steals your time.' },
-    { n: 'CONNECT', text: 'Connect the tools you already use into one system.' },
-    { n: 'AUTOMATE', text: 'Turn repetitive work into intelligent, reliable workflows.' },
-    { n: 'MEASURE', text: 'Track what is really happening, so you can grow with evidence.' },
-  ];
+function PromiseScene() {
   return (
-    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-16', cls)}>
-      <SectionHead eyebrow="What we promise" title="Not a website. A system that works." sub="NorthForge exists to take the repetitive parts of running a business and make them automatic, visible and measurable." />
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-10">
-        {promises.map((p, i) => (
-          <div key={p.n} className="card p-6 relative overflow-hidden">
-            <span className="absolute -right-2 -top-4 font-display font-black text-[88px] leading-none text-brand/10 select-none">{i + 1}</span>
-            <span className="inline-flex items-center gap-2 chip text-brand mb-4"><span className="w-1.5 h-1.5 rounded-full bg-brand" /> {p.n}</span>
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 text-center">
+      <div className="inline-flex items-center gap-2 chip mb-5"><span className="w-1.5 h-1.5 rounded-full bg-brand" /> What we promise</div>
+      <h2 className="font-display font-black text-content leading-[1.05] tracking-tight text-3xl sm:text-5xl max-w-3xl mx-auto">
+        Not a website. A system that works.
+      </h2>
+      <p className="text-muted mt-4 max-w-2xl mx-auto leading-relaxed">
+        NorthForge exists to take the repetitive parts of running a business and make them automatic, visible and measurable.
+      </p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 max-w-5xl mx-auto">
+        {PROMISES.map((p, i) => (
+          <div key={p.n} className="card p-5 text-left relative overflow-hidden">
+            <span className="absolute -right-2 -top-4 font-display font-black text-[72px] leading-none text-brand/10 select-none">{i + 1}</span>
+            <span className="inline-flex items-center gap-2 chip text-brand mb-3"><span className="w-1.5 h-1.5 rounded-full bg-brand" /> {p.n}</span>
             <p className="text-sm text-content font-medium leading-relaxed relative">{p.text}</p>
           </div>
         ))}
       </div>
-    </section>
+    </div>
+  );
+}
+
+function CinematicStage() {
+  const root = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const mobile = useMobileDevice();
+  const stacked = reduced || mobile;
+
+  useEffect(() => {
+    const shell = root.current;
+    if (!shell || stacked) return;
+    const scenes = Array.from(shell.querySelectorAll<HTMLElement>('[data-scene]'));
+    const flash = shell.querySelector('[data-cine-flash]');
+    const rail = shell.querySelector('[data-cine-rail]');
+    if (scenes.length < 2) return;
+
+    const ctx = gsap.context(() => {
+      // Start: only the hero scene is visible; the others are waiting below.
+      gsap.set(scenes, { autoAlpha: 0, y: 55, scale: 0.95 });
+      gsap.set(scenes[0], { autoAlpha: 1, y: 0, scale: 1 });
+
+      const st = {
+        trigger: shell,
+        start: 'top top',
+        end: '+=230%',
+        scrub: 0.8,
+        pin: true,
+        anticipatePin: 1,
+      };
+
+      const tl = gsap.timeline({ scrollTrigger: st, defaults: { ease: 'power1.inOut' } });
+      tl.to(scenes[0], { autoAlpha: 0, y: -55, scale: 1.06, duration: 0.5 })
+        .fromTo(flash, { opacity: 0, scale: 0.9 }, { opacity: 0.85, scale: 1, duration: 0.15 }, '<0.22')
+        .to(flash, { opacity: 0, duration: 0.35 }, '<0.28')
+        .fromTo(scenes[1], { autoAlpha: 0, y: 55, scale: 0.95 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5 }, '<0.08')
+        .to({}, { duration: 0.45 })
+        .to(scenes[1], { autoAlpha: 0, y: -55, scale: 1.06, duration: 0.5 })
+        .fromTo(flash, { opacity: 0, scale: 0.9 }, { opacity: 0.85, scale: 1, duration: 0.15 }, '<0.22')
+        .to(flash, { opacity: 0, duration: 0.35 }, '<0.28')
+        .fromTo(scenes[2], { autoAlpha: 0, y: 55, scale: 0.95 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5 }, '<0.08');
+
+      if (rail) {
+        gsap.fromTo(rail, { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { ...st, end: '+=230%' } });
+      }
+    }, shell);
+
+    return () => {
+      ScrollTrigger.refresh();
+      ctx.revert();
+    };
+  }, [stacked]);
+
+  if (stacked) {
+    return (
+      <div className="relative z-10">
+        <Hero />
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+          <ProblemScene />
+        </section>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+          <PromiseScene />
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={root} className="relative h-[100svh] min-h-[680px] overflow-hidden">
+      {/* Scenes */}
+      <div data-scene className="absolute inset-0 flex items-center justify-center">
+        <Hero />
+      </div>
+      <div data-scene className="absolute inset-0 flex items-center justify-center">
+        <ProblemScene />
+      </div>
+      <div data-scene className="absolute inset-0 flex items-center justify-center">
+        <PromiseScene />
+      </div>
+
+      {/* Scene flash — motion cue between worlds */}
+      <div
+        data-cine-flash
+        className="pointer-events-none absolute inset-0 z-30"
+        style={{ background: 'radial-gradient(circle at 50% 42%, rgba(139,92,246,0.32), rgba(244,246,251,0.16) 42%, transparent 72%)' }}
+      />
+
+      {/* Scroll rail */}
+      <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3">
+        <span className="text-[10px] font-black text-faint tracking-widest">01 / 03</span>
+        <div className="w-1 h-44 rounded-full bg-sunken overflow-hidden" style={{ boxShadow: 'var(--clay-inset)' }}>
+          <div data-cine-rail className="w-full h-full origin-top bg-brand" style={{ borderRadius: 999 }} />
+        </div>
+        <span className="text-[10px] font-black text-faint tracking-widest">03 / 03</span>
+      </div>
+
+      {/* Scroll cue */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1.5 text-faint">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Scroll</span>
+        <ChevronDown size={16} className="animate-bounce" />
+      </div>
+    </div>
   );
 }
 
