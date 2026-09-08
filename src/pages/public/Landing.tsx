@@ -12,23 +12,37 @@ import { ChatWidget } from '@/components/ChatWidget';
 import { db } from '@/services/db';
 import { defaultAssistant } from '@/data/assistant';
 import { PLANS, AGENCY, formatINR } from '@/data/catalog';
+import { PUBLIC_FAQS } from '@/data/faq';
 import { cx } from '@/utils/format';
+import { useSmoothScroll } from '@/hooks/useSmoothScroll';
+import { ScrollProgress, Parallax, Marquee, useReducedMotion, useMobileDevice } from '@/components/motion/motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 import { waLink as buildWa, waMessages, planWa } from '@/utils/contact';
 const waLink = buildWa(waMessages.general);
 
-/* Scroll-reveal hook */
+/* Scroll-reveal hook — GSAP ScrollTrigger fade/rise for every major section. */
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
+  const reduced = useReducedMotion();
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShown(true); io.disconnect(); } }, { threshold: 0.15 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return { ref, cls: cx('transition-all duration-700', shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8') };
+    if (!el || reduced) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(el,
+        { autoAlpha: 0, y: 28 },
+        {
+          autoAlpha: 1, y: 0, duration: 0.9, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        }
+      );
+    }, ref);
+    return () => ctx.revert();
+  }, [reduced]);
+  return { ref, cls: '' };
 }
 
 export default function Landing() {
@@ -36,14 +50,23 @@ export default function Landing() {
   // Visitor-facing chat: first configured assistant, else the default
   // NorthForge assistant built from the catalog.
   const assistant = db.readSync('assistants')[0] || defaultAssistant;
+  useSmoothScroll();
+
+  useEffect(() => {
+    document.title = 'NorthForge — Websites · Automation · AI · Growth';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', 'NorthForge builds premium websites connected to lead capture, WhatsApp, AI, automation and analytics — a complete digital system that turns visitors into customers.');
+  }, []);
+
   return (
     <div className="min-h-screen bg-surface relative overflow-x-hidden">
+      <ScrollProgress />
       <ClayBlobs variant="marketing" />
       <Nav menu={menu} setMenu={setMenu} />
       <ChatWidget assistant={assistant} />
       <span id="top" />
       <main className="relative z-10">
-        <Hero />
+        <CinematicStage />
         <ValueStrip />
         <Services />
         <HowItWorks />
@@ -52,6 +75,7 @@ export default function Landing() {
         <AIShowcase />
         <LeadShowcase />
         <WhyNorthForge />
+        <SystemMonitor />
         <FAQ />
         <FinalCTA />
       </main>
@@ -141,31 +165,62 @@ function Nav({ menu, setMenu }: { menu: boolean; setMenu: (v: boolean) => void }
 
 /* ============================ HERO ============================ */
 function Hero() {
+  const root = useRef<HTMLElement>(null);
+  const reduced = useReducedMotion();
+
+  // Hero entrance choreography — navbar handled by Nav, then eyebrow,
+  // headline, copy, CTAs, notes, then the connected system visual.
+  useEffect(() => {
+    const el = root.current;
+    if (!el || reduced) return;
+    const ctx = gsap.context(() => {
+      const parts = [
+        '[data-hero-eyebrow]',
+        '[data-hero-headline]',
+        '[data-hero-copy]',
+        '[data-hero-cta]',
+        '[data-hero-notes]',
+        '[data-hero-visual]',
+      ];
+      gsap.set(parts, { autoAlpha: 0, y: 24 });
+      const tl = gsap.timeline({ defaults: { ease: 'power3.out', duration: 0.8 } });
+      tl.fromTo('[data-hero-eyebrow]', { autoAlpha: 0, y: 18 }, { autoAlpha: 1, y: 0, duration: 0.45 })
+        .fromTo('[data-hero-headline]', { autoAlpha: 0, y: 26 }, { autoAlpha: 1, y: 0 }, '-=0.15')
+        .fromTo('[data-hero-copy]', { autoAlpha: 0, y: 22 }, { autoAlpha: 1, y: 0 }, '-=0.4')
+        .fromTo('[data-hero-cta]', { autoAlpha: 0, y: 20 }, { autoAlpha: 1, y: 0 }, '-=0.4')
+        .fromTo('[data-hero-notes]', { autoAlpha: 0, y: 14 }, { autoAlpha: 1, y: 0, duration: 0.5 }, '-=0.35')
+        .fromTo('[data-hero-visual]', { autoAlpha: 0, scale: 0.97 }, { autoAlpha: 1, scale: 1 }, '-=0.3');
+    }, el);
+    return () => ctx.revert();
+  }, [reduced]);
+
   return (
-    <section className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-8 sm:pt-20 sm:pb-16">
+    <section ref={root} className="max-w-6xl mx-auto px-4 sm:px-6 pt-14 pb-8 sm:pt-20 sm:pb-16">
       <div className="grid lg:grid-cols-[1.05fr_0.95fr] gap-10 lg:gap-6 items-center">
-        <div className="animate-fade-up">
-          <div className="inline-flex items-center gap-2 chip mb-6"><Sparkles size={13} className="text-brand" /> Web · Automation · AI · Growth</div>
-          <h1 className="font-display font-black text-content leading-[1.02] tracking-tight text-[42px] sm:text-6xl">
+        <div>
+          <div data-hero-eyebrow className="inline-flex items-center gap-2 chip mb-6"><Sparkles size={13} className="text-brand" /> Web · Automation · AI · Growth</div>
+          <h1 data-hero-headline className="font-display font-black text-content leading-[1.02] tracking-tight text-[42px] sm:text-6xl">
             Premium websites that <span className="relative inline-block">actually
               <svg className="absolute -bottom-1 left-0 w-full" height="10" viewBox="0 0 200 10" preserveAspectRatio="none"><path d="M2 7 Q100 1 198 6" stroke="#DB2777" strokeWidth="4" fill="none" strokeLinecap="round"/></svg>
             </span> bring leads.
           </h1>
-          <p className="mt-6 text-lg text-muted max-w-xl leading-relaxed">
+          <p data-hero-copy className="mt-6 text-lg text-muted max-w-xl leading-relaxed">
             NorthForge builds business websites with lead capture, WhatsApp, AI assistants and automation — so visitors turn into enquiries and enquiries turn into customers.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <div data-hero-cta className="mt-8 flex flex-wrap items-center gap-3">
             <Link to="/login" className="btn-primary !px-6 !py-3 text-base">Start Your Website <ArrowRight size={18} /></Link>
             <a href="#pricing" onClick={(e) => { e.preventDefault(); scrollToSection('pricing'); }} className="btn-outline !px-6 !py-3 text-base">View Pricing</a>
             <a href={waLink} target="_blank" rel="noreferrer" className="btn-ghost !px-4 !py-3 text-base text-brand"><MessageCircle size={18} /> WhatsApp</a>
           </div>
-          <div className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold text-muted">
+          <div data-hero-notes className="mt-8 flex flex-wrap gap-x-6 gap-y-2 text-xs font-bold text-muted">
             {['Hosting & SSL included', 'Live in 7–14 days', 'From ₹999 / 28 days'].map((t) => (
               <span key={t} className="flex items-center gap-1.5"><Check size={14} className="text-clay-success" /> {t}</span>
             ))}
           </div>
         </div>
-        <HeroComposition />
+        <div data-hero-visual>
+          <Parallax speed={11}><HeroComposition /></Parallax>
+        </div>
       </div>
     </section>
   );
@@ -217,25 +272,254 @@ function HeroComposition() {
   );
 }
 
+/* ============================ CINEMATIC STAGE =============================
+   Igloo-style scroll: the first three stories are one pinned scene. As you
+   scroll, the camera moves forward — the hero drifts away, a flash washes
+   across, then the problem and promise scenes rise into view. Scrubbed to
+   scroll, fully reversed on scroll-up, and disabled on mobile/reduced motion
+   where a simple stacked read is the right call. */
+const PAINS = [
+  { icon: MessageCircle, title: 'Missed enquiries', text: 'A visitor reaches out at night and never hears back.' },
+  { icon: Zap, title: 'Slow replies', text: 'Answering the same questions over and over instead of doing the work.' },
+  { icon: CalendarClock, title: 'Manual follow-ups', text: 'Chasing leads by memory and hoping they get back to you.' },
+  { icon: Users, title: 'Scattered customer info', text: 'WhatsApp chats, emails, spreadsheets — nowhere connected.' },
+  { icon: Search, title: 'Poor visibility', text: 'You know the website gets traffic, but you can\u2019t see what happens after.' },
+  { icon: Bot, title: 'Disconnected tools', text: 'Each tool solves one problem, and they don\u2019t talk to each other.' },
+];
+const PROMISES = [
+  { n: 'FIND', text: 'Find the repetitive business work that quietly steals your time.' },
+  { n: 'CONNECT', text: 'Connect the tools you already use into one system.' },
+  { n: 'AUTOMATE', text: 'Turn repetitive work into intelligent, reliable workflows.' },
+  { n: 'MEASURE', text: 'Track what is really happening, so you can grow with evidence.' },
+];
+
+function ProblemScene() {
+  return (
+    <div className="w-full max-w-5xl mx-auto px-4 sm:px-6 text-center">
+      <div className="inline-flex items-center gap-2 chip mb-5"><span className="w-1.5 h-1.5 rounded-full bg-pink2" /> The real problem</div>
+      <h2 className="font-display font-black text-content leading-[1.05] tracking-tight text-3xl sm:text-5xl max-w-3xl mx-auto">
+        Traffic isn't the issue. What happens after it is.
+      </h2>
+      <p className="text-muted mt-4 max-w-2xl mx-auto leading-relaxed">
+        Most businesses already have enquiries coming in. The reason they don't become customers is rarely the website — it's the disconnect between the enquiry and the follow-up.
+      </p>
+      <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4 mt-8 max-w-4xl mx-auto">
+        {PAINS.map((p) => (
+          <div key={p.title} className="card p-5 text-left">
+            <div className="w-10 h-10 rounded-2xl bg-rose-500/10 text-rose-500 flex items-center justify-center mb-3"><p.icon size={17} /></div>
+            <h3 className="font-display font-extrabold text-content text-[15px]">{p.title}</h3>
+            <p className="text-xs text-muted mt-1 leading-relaxed">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function PromiseScene() {
+  return (
+    <div className="w-full max-w-6xl mx-auto px-4 sm:px-6 text-center">
+      <div className="inline-flex items-center gap-2 chip mb-5"><span className="w-1.5 h-1.5 rounded-full bg-brand" /> What we promise</div>
+      <h2 className="font-display font-black text-content leading-[1.05] tracking-tight text-3xl sm:text-5xl max-w-3xl mx-auto">
+        Not a website. A system that works.
+      </h2>
+      <p className="text-muted mt-4 max-w-2xl mx-auto leading-relaxed">
+        NorthForge exists to take the repetitive parts of running a business and make them automatic, visible and measurable.
+      </p>
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mt-8 max-w-5xl mx-auto">
+        {PROMISES.map((p, i) => (
+          <div key={p.n} className="card p-5 text-left relative overflow-hidden">
+            <span className="absolute -right-2 -top-4 font-display font-black text-[72px] leading-none text-brand/10 select-none">{i + 1}</span>
+            <span className="inline-flex items-center gap-2 chip text-brand mb-3"><span className="w-1.5 h-1.5 rounded-full bg-brand" /> {p.n}</span>
+            <p className="text-sm text-content font-medium leading-relaxed relative">{p.text}</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function CinematicStage() {
+  const root = useRef<HTMLDivElement>(null);
+  const reduced = useReducedMotion();
+  const mobile = useMobileDevice();
+  const stacked = reduced || mobile;
+
+  useEffect(() => {
+    const shell = root.current;
+    if (!shell || stacked) return;
+    const scenes = Array.from(shell.querySelectorAll<HTMLElement>('[data-scene]'));
+    const flash = shell.querySelector('[data-cine-flash]');
+    const rail = shell.querySelector('[data-cine-rail]');
+    if (scenes.length < 2) return;
+
+    const ctx = gsap.context(() => {
+      // Start: only the hero scene is visible; the others are waiting below.
+      gsap.set(scenes, { autoAlpha: 0, y: 55, scale: 0.95 });
+      gsap.set(scenes[0], { autoAlpha: 1, y: 0, scale: 1 });
+
+      const st = {
+        trigger: shell,
+        start: 'top top',
+        end: '+=230%',
+        scrub: 0.8,
+        pin: true,
+        anticipatePin: 1,
+      };
+
+      const tl = gsap.timeline({ scrollTrigger: st, defaults: { ease: 'power1.inOut' } });
+      tl.to(scenes[0], { autoAlpha: 0, y: -55, scale: 1.06, duration: 0.5 })
+        .fromTo(flash, { opacity: 0, scale: 0.9 }, { opacity: 0.85, scale: 1, duration: 0.15 }, '<0.22')
+        .to(flash, { opacity: 0, duration: 0.35 }, '<0.28')
+        .fromTo(scenes[1], { autoAlpha: 0, y: 55, scale: 0.95 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5 }, '<0.08')
+        .to({}, { duration: 0.45 })
+        .to(scenes[1], { autoAlpha: 0, y: -55, scale: 1.06, duration: 0.5 })
+        .fromTo(flash, { opacity: 0, scale: 0.9 }, { opacity: 0.85, scale: 1, duration: 0.15 }, '<0.22')
+        .to(flash, { opacity: 0, duration: 0.35 }, '<0.28')
+        .fromTo(scenes[2], { autoAlpha: 0, y: 55, scale: 0.95 }, { autoAlpha: 1, y: 0, scale: 1, duration: 0.5 }, '<0.08');
+
+      if (rail) {
+        gsap.fromTo(rail, { scaleY: 0 }, { scaleY: 1, ease: 'none', scrollTrigger: { ...st, end: '+=230%' } });
+      }
+    }, shell);
+
+    return () => {
+      ScrollTrigger.refresh();
+      ctx.revert();
+    };
+  }, [stacked]);
+
+  if (stacked) {
+    return (
+      <div className="relative z-10">
+        <Hero />
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+          <ProblemScene />
+        </section>
+        <section className="max-w-6xl mx-auto px-4 sm:px-6 py-14">
+          <PromiseScene />
+        </section>
+      </div>
+    );
+  }
+
+  return (
+    <div ref={root} className="relative h-[100svh] min-h-[680px] overflow-hidden">
+      {/* Scenes */}
+      <div data-scene className="absolute inset-0 flex items-center justify-center">
+        <Hero />
+      </div>
+      <div data-scene className="absolute inset-0 flex items-center justify-center">
+        <ProblemScene />
+      </div>
+      <div data-scene className="absolute inset-0 flex items-center justify-center">
+        <PromiseScene />
+      </div>
+
+      {/* Scene flash — motion cue between worlds */}
+      <div
+        data-cine-flash
+        className="pointer-events-none absolute inset-0 z-30"
+        style={{ background: 'radial-gradient(circle at 50% 42%, rgba(139,92,246,0.32), rgba(244,246,251,0.16) 42%, transparent 72%)' }}
+      />
+
+      {/* Scroll rail */}
+      <div className="absolute right-4 sm:right-6 top-1/2 -translate-y-1/2 z-40 hidden md:flex flex-col items-center gap-3">
+        <span className="text-[10px] font-black text-faint tracking-widest">01 / 03</span>
+        <div className="w-1 h-44 rounded-full bg-sunken overflow-hidden" style={{ boxShadow: 'var(--clay-inset)' }}>
+          <div data-cine-rail className="w-full h-full origin-top bg-brand" style={{ borderRadius: 999 }} />
+        </div>
+        <span className="text-[10px] font-black text-faint tracking-widest">03 / 03</span>
+      </div>
+
+      {/* Scroll cue */}
+      <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-40 flex flex-col items-center gap-1.5 text-faint">
+        <span className="text-[10px] font-black uppercase tracking-[0.2em]">Scroll</span>
+        <ChevronDown size={16} className="animate-bounce" />
+      </div>
+    </div>
+  );
+}
+
+/* ============================ SYSTEM MONITOR ============================ */
+function SystemMonitor() {
+  const { ref, cls } = useReveal();
+  const metrics = [
+    { k: 'Enquiries', v: '—' },
+    { k: 'Qualified leads', v: '—' },
+    { k: 'Follow-ups', v: '—' },
+    { k: 'Appointments', v: '—' },
+  ];
+  const stream = [
+    { icon: MessageCircle, label: 'NEW ENQUIRY' },
+    { icon: Bot, label: 'AI QUALIFIED' },
+    { icon: BarChart3, label: 'CRM UPDATED' },
+    { icon: Zap, label: 'TEAM NOTIFIED' },
+    { icon: CalendarClock, label: 'APPOINTMENT BOOKED' },
+    { icon: Check, label: 'FOLLOW-UP SCHEDULED' },
+  ];
+  return (
+    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-16', cls)}>
+      <div className="card p-6 sm:p-10 relative overflow-hidden" style={{ background: 'var(--card-hi)' }}>
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4 mb-8">
+          <div>
+            <div className="chip text-[11px] mb-3">NORTHFORGE SYSTEM</div>
+            <h2 className="font-display font-black text-content text-2xl sm:text-3xl tracking-tight">The system behind the website.</h2>
+            <p className="text-sm text-muted mt-2 max-w-xl leading-relaxed">When a visitor submits an enquiry, the NorthForge layer captures it, qualifies it, notifies the team and keeps the follow-up moving.</p>
+          </div>
+          <div className="flex flex-col items-end gap-2">
+            <span className="badge bg-clay-success/15 text-emerald-600 dark:text-emerald-400"><span className="w-1.5 h-1.5 rounded-full bg-current" /> Active</span>
+            <span className="badge bg-sunken text-faint">DEMO DATA</span>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          {metrics.map((m) => (
+            <div key={m.k} className="card p-5 text-center">
+              <p className="font-display font-black text-content text-2xl">{m.v}</p>
+              <p className="text-xs text-muted font-bold mt-1">{m.k}</p>
+            </div>
+          ))}
+        </div>
+        <Marquee speed={26} decorative>
+          {stream.map((s) => (
+            <span key={s.label} className="inline-flex items-center gap-2 mx-3 chip">
+              <s.icon size={15} className="text-brand" />
+              <span className="font-display font-extrabold text-content text-xs">{s.label}</span>
+              <span className="w-1 h-1 rounded-full bg-clay-success" />
+            </span>
+          ))}
+        </Marquee>
+        <p className="text-[11px] text-faint mt-6">Numbers fill in once your website starts capturing real enquiries. Nothing here is invented, and AI never presents sample data as your real performance.</p>
+      </div>
+    </section>
+  );
+}
+
 /* ============================ VALUE STRIP ============================ */
 function ValueStrip() {
   const { ref, cls } = useReveal();
   const items = [
-    { icon: Globe, t: 'A website that sells', d: 'Designed around enquiries, not just looks.' },
-    { icon: MessageCircle, t: 'Reach you on WhatsApp', d: 'Where your customers already are.' },
-    { icon: Bot, t: 'AI that answers', d: 'Common questions, handled 24/7.' },
-    { icon: BarChart3, t: 'See what works', d: 'Real analytics on leads & traffic.' },
+    { icon: ShieldCheck, t: 'Hosting & SSL' },
+    { icon: Zap, t: 'Fast delivery' },
+    { icon: Users, t: 'Lead capture' },
+    { icon: MessageCircle, t: 'WhatsApp' },
+    { icon: Bot, t: 'AI' },
+    { icon: Workflow, t: 'Automation' },
+    { icon: BarChart3, t: 'Analytics' },
+    { icon: Search, t: 'SEO' },
   ];
   return (
-    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-10', cls)}>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {items.map((it) => (
-          <div key={it.t} className="card p-5">
-            <div className="w-11 h-11 rounded-2xl bg-brand/12 shadow-clay-inset flex items-center justify-center mb-3"><it.icon size={18} className="text-brand" /></div>
-            <h3 className="font-display font-extrabold text-content text-[15px]">{it.t}</h3>
-            <p className="text-xs text-muted mt-1 leading-relaxed">{it.d}</p>
-          </div>
-        ))}
+    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-6', cls)}>
+      <div className="card px-3 py-4 overflow-hidden">
+        <Marquee speed={30} decorative>
+          {items.map((it) => (
+            <span key={it.t} className="inline-flex items-center gap-2 mx-3 chip">
+              <it.icon size={15} className="text-brand" />
+              <span className="font-display font-extrabold text-content">{it.t}</span>
+              <span className="text-faint">·</span>
+            </span>
+          ))}
+        </Marquee>
       </div>
     </section>
   );
@@ -473,23 +757,7 @@ function WhyNorthForge() {
 }
 
 /* ============================ FAQ ============================ */
-const faqs = [
-  { q: 'What is included in the ₹999 plan?', a: 'The Starter plan gets your business online: a premium business website, hosting & SSL, WhatsApp integration, a lead capture system and ongoing website maintenance — for ₹999 every 28 days.' },
-  { q: 'Is hosting included?', a: 'Yes. Every plan includes reliable hosting and HTTPS/SSL by default. You never pay separately for hosting.' },
-  { q: 'Do I need to buy a domain?', a: 'No. You can use an existing domain, and NorthForge can also help you set up a new custom domain.' },
-  { q: 'Can I use my existing domain?', a: 'Absolutely. If you already own a domain, we connect your new website to it.' },
-  { q: 'Can you connect WhatsApp?', a: 'Yes. WhatsApp integration is included from Starter, and full WhatsApp Business automation is available on Pro.' },
-  { q: 'Can you add an AI assistant?', a: 'Yes. The AI Customer Assistant is included from the Growth plan and answers common questions using your business information.' },
-  { q: 'What is the difference between Starter, Growth and Pro?', a: 'Starter gets your business online. Growth adds tools to get more customers — a CRM, AI assistant, follow-ups and analytics. Pro automates your business with advanced AI automation, WhatsApp Business automation and custom workflows.' },
-  { q: 'Can I upgrade later?', a: 'Yes — move from Starter to Growth to Pro at any time as your business grows.' },
-  { q: 'How long does a website take?', a: 'Typically around 7–14 days after the required content (text, images, logo) is ready. We keep you updated at each stage.' },
-  { q: 'Do you maintain the website after launch?', a: 'Yes. Maintenance & support is included in every plan — updates, fixes and content changes are covered.' },
-  { q: 'Can you build custom features?', a: 'Yes, through a Custom Quote tailored to your project, beyond the standard plans.' },
-  { q: 'Can you build booking systems?', a: 'Yes. Appointment & booking systems are available on Pro and as part of custom builds.' },
-  { q: 'Can you automate follow-ups?', a: 'Yes. Automated follow-ups are included from Growth, with full workflow automation on Pro.' },
-  { q: 'Do you work with businesses outside Mangalore?', a: 'NorthForge is based in Mangalore and works closely with local businesses. We also work with businesses beyond Mangalore — message us on WhatsApp and we will discuss what fits.' },
-  { q: 'How do I get started?', a: 'Tap Start Your Website or message us on WhatsApp. We will learn about your business and design your system.' },
-];
+const faqs = PUBLIC_FAQS;
 
 function FAQ() {
   const { ref, cls } = useReveal();
@@ -563,7 +831,12 @@ function Footer() {
         </div>
         <div className="mt-8 pt-6 border-t border-line/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-faint">
           <span>© {new Date().getFullYear()} NorthForge · {AGENCY.website}</span>
-          <div className="flex gap-4"><Link to="/login" className="hover:text-content">Sign in</Link><a href={waLink} target="_blank" rel="noreferrer" className="hover:text-content">Contact</a></div>
+          <div className="flex gap-4">
+            <Link to="/privacy" className="hover:text-content">Privacy</Link>
+            <Link to="/terms" className="hover:text-content">Terms</Link>
+            <Link to="/login" className="hover:text-content">Sign in</Link>
+            <a href={waLink} target="_blank" rel="noreferrer" className="hover:text-content">Contact</a>
+          </div>
         </div>
       </div>
     </footer>

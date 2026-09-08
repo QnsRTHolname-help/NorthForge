@@ -49,8 +49,11 @@ production security posture.
 ## What's inside
 
 ### Public
-- Marketing landing page — hero, services, four-tier pricing, process, why, FAQ, contact/WhatsApp
-- Polished admin + client login screens
+- Marketing landing page (`/`) — hero, services, four-tier pricing, process, why, FAQ, CTA
+- Dedicated public pages — `/services`, `/how-it-works`, `/pricing`, `/faq`, `/contact`, `/privacy`, `/terms`
+- Real automation-audit contact form (`/contact`) backed by `POST /api/contact` (validates, rate-limits, stores the lead in the NorthForge pipeline, and persists server-side when Supabase envs are set)
+- Public AI chat (`POST /api/chat`) with local FAQ fallback
+- Polished admin + client login screens (`/login`), 404 and unauthorized pages
 
 ### Admin — the command center (`/app`)
 - **Dashboard** — 8 KPI cards with trends & sparklines, traffic chart, hot leads, projects, upcoming, activity

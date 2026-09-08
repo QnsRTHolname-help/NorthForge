@@ -8,6 +8,15 @@ import { BootLoader, PageLoader } from './components/Loader';
 
 // Public
 const Landing = lazy(() => import('./pages/public/Landing'));
+const ServicesPage = lazy(() => import('./pages/public/ServicesPage'));
+const HowItWorksPage = lazy(() => import('./pages/public/HowItWorksPage'));
+const PricingPage = lazy(() => import('./pages/public/PricingPage'));
+const FAQPage = lazy(() => import('./pages/public/FAQPage'));
+const ContactPage = lazy(() => import('./pages/public/ContactPage'));
+const PrivacyPage = lazy(() => import('./pages/public/PrivacyPage'));
+const TermsPage = lazy(() => import('./pages/public/TermsPage'));
+const NotFoundPage = lazy(() => import('./pages/public/ErrorPage'));
+const UnauthorizedPage = lazy(() => import('./pages/public/UnauthorizedPage'));
 const AdminLogin = lazy(() => import('./pages/public/AdminLogin'));
 const ClientLogin = lazy(() => import('./pages/public/ClientLogin'));
 
@@ -39,7 +48,7 @@ const Subscriptions = lazy(() => import('./pages/Subscriptions'));
 const Payments = lazy(() => import('./pages/Payments'));
 const Invoices = lazy(() => import('./pages/Invoices'));
 const Plans = lazy(() => import('./pages/Plans'));
-const ServicesPage = lazy(() => import('./pages/Services'));
+const AdminServicesPage = lazy(() => import('./pages/Services'));
 const Notifications = lazy(() => import('./pages/Notifications'));
 const ActivityPage = lazy(() => import('./pages/ActivityLog'));
 const Support = lazy(() => import('./pages/Support'));
@@ -100,6 +109,14 @@ export default function App() {
     <Suspense fallback={<div className="h-screen flex items-center justify-center bg-surface"><PageLoader /></div>}>
       <Routes>
         <Route path="/" element={<Landing />} />
+        <Route path="/services" element={<ServicesPage />} />
+        <Route path="/how-it-works" element={<HowItWorksPage />} />
+        <Route path="/pricing" element={<PricingPage />} />
+        <Route path="/faq" element={<FAQPage />} />
+        <Route path="/contact" element={<ContactPage />} />
+        <Route path="/privacy" element={<PrivacyPage />} />
+        <Route path="/terms" element={<TermsPage />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
         <Route path="/login" element={<AdminLogin />} />
         <Route path="/client-login" element={<ClientLogin />} />
 
@@ -136,7 +153,7 @@ export default function App() {
                   <Route path="payments" element={<Payments />} />
                   <Route path="invoices" element={<Invoices />} />
                   <Route path="plans" element={<Plans />} />
-                  <Route path="services" element={<ServicesPage />} />
+                  <Route path="services" element={<AdminServicesPage />} />
                   <Route path="notifications" element={<Notifications />} />
                   <Route path="activity" element={<ActivityPage />} />
                   <Route path="requests" element={<Requests />} />
@@ -179,7 +196,7 @@ export default function App() {
           </Guard>
         } />
 
-        <Route path="*" element={<Navigate to="/" replace />} />
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
     </Suspense>
   );

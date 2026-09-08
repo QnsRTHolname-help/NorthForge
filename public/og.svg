@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" width="1200" height="630">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0D12"/>
+      <stop offset="1" stop-color="#1c1330"/>
+    </linearGradient>
+    <linearGradient id="accent" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#3B82FF"/>
+      <stop offset="1" stop-color="#8B5CF6"/>
+    </linearGradient>
+  </defs>
+  <rect width="1200" height="630" fill="url(#bg)"/>
+  <rect x="64" y="64" width="150" height="150" rx="42" fill="url(#accent)"/>
+  <text x="139" y="166" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900" fill="#fff">NF</text>
+  <text x="64" y="300" font-family="Arial, Helvetica, sans-serif" font-size="72" font-weight="900" fill="#fff">NorthForge</text>
+  <text x="64" y="380" font-family="Arial, Helvetica, sans-serif" font-size="30" font-weight="600" fill="#B7A9FF">Websites · Automation · AI · Growth</text>
+  <text x="64" y="440" font-family="Arial, Helvetica, sans-serif" font-size="22" fill="#8f8a9e">Systems that turn visitors into enquiries and enquiries into customers.</text>
+</svg>
