@@ -12,7 +12,9 @@ import { ChatWidget } from '@/components/ChatWidget';
 import { db } from '@/services/db';
 import { defaultAssistant } from '@/data/assistant';
 import { PLANS, AGENCY, formatINR } from '@/data/catalog';
+import { PUBLIC_FAQS } from '@/data/faq';
 import { cx } from '@/utils/format';
+import { useSmoothScroll } from '@/hooks/useSmoothScroll';
 
 import { waLink as buildWa, waMessages, planWa } from '@/utils/contact';
 const waLink = buildWa(waMessages.general);
@@ -36,6 +38,14 @@ export default function Landing() {
   // Visitor-facing chat: first configured assistant, else the default
   // NorthForge assistant built from the catalog.
   const assistant = db.readSync('assistants')[0] || defaultAssistant;
+  useSmoothScroll();
+
+  useEffect(() => {
+    document.title = 'NorthForge — Websites · Automation · AI · Growth';
+    const meta = document.querySelector('meta[name="description"]');
+    if (meta) meta.setAttribute('content', 'NorthForge builds premium websites connected to lead capture, WhatsApp, AI, automation and analytics — a complete digital system that turns visitors into customers.');
+  }, []);
+
   return (
     <div className="min-h-screen bg-surface relative overflow-x-hidden">
       <ClayBlobs variant="marketing" />
@@ -473,23 +483,7 @@ function WhyNorthForge() {
 }
 
 /* ============================ FAQ ============================ */
-const faqs = [
-  { q: 'What is included in the ₹999 plan?', a: 'The Starter plan gets your business online: a premium business website, hosting & SSL, WhatsApp integration, a lead capture system and ongoing website maintenance — for ₹999 every 28 days.' },
-  { q: 'Is hosting included?', a: 'Yes. Every plan includes reliable hosting and HTTPS/SSL by default. You never pay separately for hosting.' },
-  { q: 'Do I need to buy a domain?', a: 'No. You can use an existing domain, and NorthForge can also help you set up a new custom domain.' },
-  { q: 'Can I use my existing domain?', a: 'Absolutely. If you already own a domain, we connect your new website to it.' },
-  { q: 'Can you connect WhatsApp?', a: 'Yes. WhatsApp integration is included from Starter, and full WhatsApp Business automation is available on Pro.' },
-  { q: 'Can you add an AI assistant?', a: 'Yes. The AI Customer Assistant is included from the Growth plan and answers common questions using your business information.' },
-  { q: 'What is the difference between Starter, Growth and Pro?', a: 'Starter gets your business online. Growth adds tools to get more customers — a CRM, AI assistant, follow-ups and analytics. Pro automates your business with advanced AI automation, WhatsApp Business automation and custom workflows.' },
-  { q: 'Can I upgrade later?', a: 'Yes — move from Starter to Growth to Pro at any time as your business grows.' },
-  { q: 'How long does a website take?', a: 'Typically around 7–14 days after the required content (text, images, logo) is ready. We keep you updated at each stage.' },
-  { q: 'Do you maintain the website after launch?', a: 'Yes. Maintenance & support is included in every plan — updates, fixes and content changes are covered.' },
-  { q: 'Can you build custom features?', a: 'Yes, through a Custom Quote tailored to your project, beyond the standard plans.' },
-  { q: 'Can you build booking systems?', a: 'Yes. Appointment & booking systems are available on Pro and as part of custom builds.' },
-  { q: 'Can you automate follow-ups?', a: 'Yes. Automated follow-ups are included from Growth, with full workflow automation on Pro.' },
-  { q: 'Do you work with businesses outside Mangalore?', a: 'NorthForge is based in Mangalore and works closely with local businesses. We also work with businesses beyond Mangalore — message us on WhatsApp and we will discuss what fits.' },
-  { q: 'How do I get started?', a: 'Tap Start Your Website or message us on WhatsApp. We will learn about your business and design your system.' },
-];
+const faqs = PUBLIC_FAQS;
 
 function FAQ() {
   const { ref, cls } = useReveal();
@@ -563,7 +557,12 @@ function Footer() {
         </div>
         <div className="mt-8 pt-6 border-t border-line/60 flex flex-col sm:flex-row items-center justify-between gap-2 text-xs text-faint">
           <span>© {new Date().getFullYear()} NorthForge · {AGENCY.website}</span>
-          <div className="flex gap-4"><Link to="/login" className="hover:text-content">Sign in</Link><a href={waLink} target="_blank" rel="noreferrer" className="hover:text-content">Contact</a></div>
+          <div className="flex gap-4">
+            <Link to="/privacy" className="hover:text-content">Privacy</Link>
+            <Link to="/terms" className="hover:text-content">Terms</Link>
+            <Link to="/login" className="hover:text-content">Sign in</Link>
+            <a href={waLink} target="_blank" rel="noreferrer" className="hover:text-content">Contact</a>
+          </div>
         </div>
       </div>
     </footer>

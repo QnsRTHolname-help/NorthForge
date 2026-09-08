@@ -2,6 +2,7 @@ import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'node:url';
 import { spawn } from 'node:child_process';
+import { existsSync } from 'node:fs';
 // Auto-start the local API server (serves /api/chat on :3000) during dev so
 // the AI widget works with a single `npm run dev`. Deployments use Vercel
 // functions instead — this plugin only runs for `vite` / `vite dev`.
@@ -10,7 +11,11 @@ function apiDevServer() {
     return {
         name: 'northforge-dev-api',
         configureServer: function () {
-            proc = spawn(process.execPath, ['node_modules/tsx/dist/cli.mjs', '--env-file=.env.local', 'api/dev-server.ts'], {
+            var args = ['node_modules/tsx/dist/cli.mjs'];
+            if (existsSync('.env.local'))
+                args.push('--env-file=.env.local');
+            args.push('server/dev-server.ts');
+            proc = spawn(process.execPath, args, {
                 stdio: 'inherit',
                 shell: process.platform === 'win32',
             });

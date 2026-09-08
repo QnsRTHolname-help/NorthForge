@@ -10,6 +10,7 @@
 import { createServer } from 'node:http';
 import type { VercelRequest, VercelResponse } from '@vercel/node';
 import chatHandler from '../api/chat.js';
+import contactHandler from '../api/contact.js';
 
 const PORT = Number(process.env.PORT || 3000);
 
@@ -53,6 +54,9 @@ createServer(async (req, res) => {
 
   if (url.startsWith('/api/chat')) {
     return chatHandler(vreq, vres);
+  }
+  if (url.startsWith('/api/contact')) {
+    return contactHandler(vreq, vres);
   }
   res.statusCode = 404;
   res.setHeader('Content-Type', 'application/json');

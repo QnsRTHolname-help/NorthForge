@@ -423,6 +423,63 @@ export const authService = {
   },
 };
 
+// ---- PUBLIC CONTACT / AUTOMATION AUDIT ------------------------------------
+export const contactService = {
+  // Creates a real lead in the NorthForge pipeline and tells the API layer so
+  // the production backend can persist the same enquiry server-side.
+  async submitAudit(input: {
+    name: string;
+    business: string;
+    email: string;
+    phone?: string;
+    businessType?: string;
+    currentTools?: string;
+    biggestTimeSink?: string;
+    monthlyEnquiries?: string;
+    message?: string;
+  }): Promise<{ lead: Lead; backend: { ok: boolean; mode?: string; ref?: string } }> {
+    const name = sanitizeText(input.name, LIMITS.name);
+    const business = sanitizeText(input.business, LIMITS.business);
+    const email = sanitizeText(input.email, LIMITS.email).toLowerCase();
+    const phone = input.phone ? sanitizeText(input.phone, LIMITS.phone) : '';
+    const category = sanitizeText(input.businessType || 'General', LIMITS.short);
+    let pitch = '';
+    if (input.currentTools) pitch += `Current tools: ${sanitizeText(input.currentTools, LIMITS.short)}\n`;
+    if (input.biggestTimeSink) pitch += `Most time consuming: ${sanitizeText(input.biggestTimeSink, LIMITS.short)}\n`;
+    if (input.monthlyEnquiries) pitch += `Monthly enquiries: ${sanitizeText(input.monthlyEnquiries, LIMITS.short)}\n`;
+    if (input.message) pitch += `Message: ${sanitizeText(input.message, LIMITS.message)}`;
+
+    // Server-side submission first so the page never reports success unless the
+    // backend accepted the enquiry. /api/contact returns `standalone` when no
+    // Supabase backend is configured (local dev), and `persisted` in production.
+    let backend: { ok: boolean; mode?: string; ref?: string };
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...input, name, business, email, phone }),
+      });
+      const json = await res.json();
+      if (!res.ok || !json?.success) {
+        throw new Error(json?.error?.message || 'The enquiry could not be submitted.');
+      }
+      backend = { ok: true, mode: json.data?.mode, ref: json.data?.ref };
+    } catch {
+      throw new Error("Your enquiry couldn't reach the server. Please try again or message us on WhatsApp.");
+    }
+
+    // Mirror the enquiry into the local NorthForge pipeline so the admin sees
+    // it immediately in local/localStorage deployments.
+    const lead = await leadService.create({
+      business, contact: name, email, phone, whatsapp: phone,
+      category, source: 'Website Contact', priority: input.monthlyEnquiries && input.monthlyEnquiries !== '0' ? 'medium' : 'low',
+      websiteStatus: 'Needs Verification', estValue: 999, pitch: pitch.trim(),
+    });
+
+    return { lead, backend };
+  },
+};
+
 // ---- ACTIVITY / SUPPORT / MISC -------------------------------------------
 export const activityService = { list: () => db.read('activities') };
 export const supportService = {
