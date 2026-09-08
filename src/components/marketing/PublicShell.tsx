@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import {
   ArrowUpRight, Mail, MapPin, MessageCircle, Menu, Phone, X,
@@ -13,6 +13,7 @@ import { AGENCY } from '@/data/catalog';
 import { waLink, waMessages } from '@/utils/contact';
 import { cx } from '@/utils/format';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
+import { ScrollProgress, ScrollReveal } from '@/components/motion/motion';
 
 const NAV_LINKS = [
   { label: 'Services', to: '/services' },
@@ -47,6 +48,7 @@ export function PublicShell({ children, seoTitle, seoDescription }: {
 
   return (
     <div className="min-h-screen bg-surface relative overflow-x-hidden">
+      <ScrollProgress />
       <ClayBlobs variant="marketing" />
       <header className="sticky top-0 z-50 px-3 sm:px-6 pt-3">
         <PublicNav menu={menu} setMenu={setMenu} wa={wa} />
@@ -194,20 +196,5 @@ export function SectionHead({ eyebrow, title, sub, align = 'center' }: { eyebrow
 }
 
 export function Reveal({ children, className }: { children: ReactNode; className?: string }) {
-  const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) { setShown(true); return; }
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShown(true); io.disconnect(); } }, { threshold: 0.15 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return (
-    <div ref={ref} className={cx('transition-all duration-700', shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8', className)}>
-      {children}
-    </div>
-  );
+  return <ScrollReveal className={className}>{children}</ScrollReveal>;
 }

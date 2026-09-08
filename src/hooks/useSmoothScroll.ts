@@ -6,6 +6,10 @@
 // ---------------------------------------------------------------------------
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 export function useSmoothScroll(enabled = true) {
   useEffect(() => {
@@ -21,6 +25,9 @@ export function useSmoothScroll(enabled = true) {
       syncTouch: false,
     });
 
+    // Keep GSAP ScrollTrigger animations in sync with Lenis.
+    lenis.on('scroll', ScrollTrigger.update);
+
     let raf = 0;
     const loop = (time: number) => {
       lenis.raf(time);
@@ -30,6 +37,7 @@ export function useSmoothScroll(enabled = true) {
 
     return () => {
       cancelAnimationFrame(raf);
+      lenis.off('scroll', ScrollTrigger.update);
       lenis.destroy();
     };
   }, [enabled]);

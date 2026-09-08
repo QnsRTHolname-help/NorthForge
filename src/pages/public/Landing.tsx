@@ -15,22 +15,34 @@ import { PLANS, AGENCY, formatINR } from '@/data/catalog';
 import { PUBLIC_FAQS } from '@/data/faq';
 import { cx } from '@/utils/format';
 import { useSmoothScroll } from '@/hooks/useSmoothScroll';
+import { ScrollProgress, Parallax, Marquee, useReducedMotion } from '@/components/motion/motion';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 import { waLink as buildWa, waMessages, planWa } from '@/utils/contact';
 const waLink = buildWa(waMessages.general);
 
-/* Scroll-reveal hook */
+/* Scroll-reveal hook — GSAP ScrollTrigger fade/rise for every major section. */
 function useReveal() {
   const ref = useRef<HTMLDivElement>(null);
-  const [shown, setShown] = useState(false);
+  const reduced = useReducedMotion();
   useEffect(() => {
     const el = ref.current;
-    if (!el) return;
-    const io = new IntersectionObserver(([e]) => { if (e.isIntersecting) { setShown(true); io.disconnect(); } }, { threshold: 0.15 });
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
-  return { ref, cls: cx('transition-all duration-700', shown ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8') };
+    if (!el || reduced) return;
+    const ctx = gsap.context(() => {
+      gsap.fromTo(el,
+        { autoAlpha: 0, y: 28 },
+        {
+          autoAlpha: 1, y: 0, duration: 0.9, ease: 'power2.out',
+          scrollTrigger: { trigger: el, start: 'top 88%', once: true },
+        }
+      );
+    }, ref);
+    return () => ctx.revert();
+  }, [reduced]);
+  return { ref, cls: '' };
 }
 
 export default function Landing() {
@@ -48,6 +60,7 @@ export default function Landing() {
 
   return (
     <div className="min-h-screen bg-surface relative overflow-x-hidden">
+      <ScrollProgress />
       <ClayBlobs variant="marketing" />
       <Nav menu={menu} setMenu={setMenu} />
       <ChatWidget assistant={assistant} />
@@ -175,7 +188,7 @@ function Hero() {
             ))}
           </div>
         </div>
-        <HeroComposition />
+        <Parallax speed={11}><HeroComposition /></Parallax>
       </div>
     </section>
   );
@@ -231,21 +244,27 @@ function HeroComposition() {
 function ValueStrip() {
   const { ref, cls } = useReveal();
   const items = [
-    { icon: Globe, t: 'A website that sells', d: 'Designed around enquiries, not just looks.' },
-    { icon: MessageCircle, t: 'Reach you on WhatsApp', d: 'Where your customers already are.' },
-    { icon: Bot, t: 'AI that answers', d: 'Common questions, handled 24/7.' },
-    { icon: BarChart3, t: 'See what works', d: 'Real analytics on leads & traffic.' },
+    { icon: ShieldCheck, t: 'Hosting & SSL' },
+    { icon: Zap, t: 'Fast delivery' },
+    { icon: Users, t: 'Lead capture' },
+    { icon: MessageCircle, t: 'WhatsApp' },
+    { icon: Bot, t: 'AI' },
+    { icon: Workflow, t: 'Automation' },
+    { icon: BarChart3, t: 'Analytics' },
+    { icon: Search, t: 'SEO' },
   ];
   return (
-    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-10', cls)}>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-        {items.map((it) => (
-          <div key={it.t} className="card p-5">
-            <div className="w-11 h-11 rounded-2xl bg-brand/12 shadow-clay-inset flex items-center justify-center mb-3"><it.icon size={18} className="text-brand" /></div>
-            <h3 className="font-display font-extrabold text-content text-[15px]">{it.t}</h3>
-            <p className="text-xs text-muted mt-1 leading-relaxed">{it.d}</p>
-          </div>
-        ))}
+    <section ref={ref} className={cx('max-w-6xl mx-auto px-4 sm:px-6 py-6', cls)}>
+      <div className="card px-3 py-4 overflow-hidden">
+        <Marquee speed={30} decorative>
+          {items.map((it) => (
+            <span key={it.t} className="inline-flex items-center gap-2 mx-3 chip">
+              <it.icon size={15} className="text-brand" />
+              <span className="font-display font-extrabold text-content">{it.t}</span>
+              <span className="text-faint">·</span>
+            </span>
+          ))}
+        </Marquee>
       </div>
     </section>
   );
